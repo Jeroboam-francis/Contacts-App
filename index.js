@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
 import chalk, { Chalk } from "chalk";
+import Table from "cli-table3";
 
 const program = new Command();
 const client = new PrismaClient();
@@ -58,7 +59,14 @@ program
       if (contacts.length === 0) {
         console.log(chalk.yellow("No contacts found."));
       } else {
-        console.table(contacts);
+        const table = new Table({
+          head: ["ID", "Name", "Email", "Phone"],
+          colWidths: [10, 20, 30, 20],
+        });
+        contacts.forEach((contact) => {
+          table.push([contact.id, contact.name, contact.email, contact.phone]);
+        });
+        console.log(table.toString());
       }
     } catch (e) {
       console.log(chalk.bgRed("Error fetching contacts:"));

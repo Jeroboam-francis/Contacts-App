@@ -43,4 +43,86 @@ addContactsCommand.action(async function (options) {
   }
 });
 
+program
+  .command("list-contacts")
+  .description("List all contacts")
+  .option("-e --email <value>", "Email of the contact")
+  .action(async function (options) {
+    const email = options.email;
+    try {
+      const contacts = await client.contact.findMany({
+        where: {
+          email: email,
+        },
+      });
+      if (contacts.length === 0) {
+        console.log(chalk.yellow("No contacts found."));
+      } else {
+        console.table(contacts);
+      }
+    } catch (e) {
+      console.log(chalk.bgRed("Error fetching contacts:"));
+      console.log(chalk.red("please check your input and try again."));
+    }
+  });
+
+program
+  .command("delete-contact")
+  .description("Delete a contact")
+  .requiredOption("-i, --id <value>", "ID of the contact")
+  .action(async function (options) {
+    const id = options.id;
+    try {
+      const contact = await client.contact.delete({
+        where: {
+          id: id,
+        },
+      });
+      console.log(chalk.green("Contact deleted successfully!"));
+    } catch (e) {
+      console.log(chalk.bgRed("Error deleting contact:"));
+      console.log(chalk.red("please check your input and try again."));
+    }
+  });
+
+program
+  .command("update-contact")
+  .description("Update a contact")
+  .requiredOption("-i, --id <value>", "ID of the contact")
+  .requiredOption("-n, --name <value>", "Name of the contact")
+  .requiredOption("-e, --email <value>", "Email of the contact")
+  .requiredOption("-p, --phone <value>", "Phone number of the contact")
+  .action(async function (options) {
+    const id = options.id;
+    const name = options.name;
+    const email = options.email;
+    const phone = options.phone;
+    try {
+      const contact = await client.contact.update({
+        where: {
+          id: id,
+        },
+        data: {
+          name: name,
+          email: email,
+          phone: phone,
+        },
+      });
+      console.log(chalk.green("Contact updated successfully!"));
+    } catch (e) {
+      console.log(chalk.bgRed("Error updating contact:"));
+      console.log(chalk.red("please check your input and try again."));
+    }
+  });
+
+program
+  .command("help")
+  .description("Show help information")
+  .action(function () {
+    console.log(chalk.blue("Available commands:"));
+    console.log(chalk.green("add-contact"));
+    console.log(chalk.green("list-contacts"));
+    console.log(chalk.green("delete-contact"));
+    console.log(chalk.green("update-contact"));
+  });
 program.parse();
